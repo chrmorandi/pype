@@ -18,8 +18,15 @@ require_once __DIR__ . '/deployer/recipe/local-config.php';
 if (!file_exists (__DIR__ . '/deployer/stage/servers.yml')) {
   die('Please create "' . __DIR__ . '/deployer/stage/servers.yml" before continuing.' . "\n");
 }
-if (!file_exists (__DIR__ . '/Gulpfile.js')) {
-  die('You need to run "dep local-config local" to create the initial configuration files before continuing.' . "\n");
+if (!file_exists (__DIR__ . '/gulpfile.js')) {
+    $command = end(explode(DIRECTORY_SEPARATOR, $argv[0]));
+    if(isset($argv[2])) {
+        if(($argv[1] . ' ' . $argv[2] != 'local-config local')) {
+            die('You need to run "' . $command . ' local-config local" to create the initial configuration files before continuing.' . "\n");
+        }
+    } else {
+        die('You need to run "' . $command . ' local-config local" to create the initial configuration files before continuing.' . "\n");
+    }
 }
 serverList(__DIR__ . '/deployer/stage/servers.yml');
 set('repository', '{{repository}}');
@@ -39,12 +46,12 @@ task('deploy:configure_composer', function () {
 
 // build assets
 task('deploy:build_assets', function () {
-   runLocally('gulp build');
+   runLocally('gulp build --production');
    $theme = env('app.theme');
-   upload(__DIR__ . '/themes/' . $theme . '/dist/css', '{{release_path}}/themes/' . $theme . '/dist/css');
-   upload(__DIR__ . '/themes/' . $theme . '/dist/js', '{{release_path}}/themes/' . $theme . '/dist/js');
-   upload(__DIR__ . '/themes/' . $theme . '/dist/fonts', '{{release_path}}/themes/' . $theme . '/dist/fonts');
-   upload(__DIR__ . '/themes/' . $theme . '/dist/img', '{{release_path}}/themes/' . $theme . '/dist/img');
+   upload(__DIR__ . '/themes/' . $theme . '/assets/dist/css', '{{release_path}}/themes/' . $theme . '/assets/dist/css');
+   upload(__DIR__ . '/themes/' . $theme . '/assets/dist/js', '{{release_path}}/themes/' . $theme . '/assets/dist/js');
+   upload(__DIR__ . '/themes/' . $theme . '/assets/dist/fonts', '{{release_path}}/themes/' . $theme . '/assets/dist/fonts');
+   upload(__DIR__ . '/themes/' . $theme . '/assets/dist/img', '{{release_path}}/themes/' . $theme . '/assets/dist/img');
 })->desc('Build assets');
 
 // update symlink to images dir
